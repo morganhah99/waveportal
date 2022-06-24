@@ -90,7 +90,7 @@ const App = () => {
    * All state property to store all waves
    */
   const [allWaves, setAllWaves] = useState([]);
-
+  console.log("This is all waves" ,allWaves);
   /*
    * Create a method that gets all waves from your contract
    */
@@ -120,11 +120,12 @@ const App = () => {
             message: wave.message
           });
         });
-
+        console.log(wavesCleaned);
         /*
          * Store our data in React State
          */
         setAllWaves(wavesCleaned);
+  
       } else {
         console.log("Ethereum object doesn't exist!")
       }
@@ -136,7 +137,39 @@ const App = () => {
   useEffect(() => {
     checkIfWalletIsConnected();
   }, [])
+  
+  useEffect(() => {
+    const checkIfWalletIsConnected = async () => {
+      try {
+        const { ethereum } = window;
 
+        if (!ethereum) {
+          console.log("Make sure you have Metamask!");
+          return;
+        } else {
+          console.log("We have the ethereum object", ethereum);
+        }
+
+        /*
+         * Check if we're authorized to access the user's wallet
+         */
+        const accounts = await ethereum.request({ method: "eth_accounts" });
+
+        if (accounts.length !== 0) {
+          const account = accounts[0];
+          console.log("Found an authorized account:", account);
+          setCurrentAccount(account);
+          getAllWaves();
+        } else {
+          console.log("No authorized account found");
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    checkIfWalletIsConnected();
+  }, []);
   return (
     <div className="mainContainer">
       <div className="dataContainer">
@@ -162,17 +195,20 @@ const App = () => {
             Connect Wallet
           </button>
         )}
-
+      
+        <div>
         {allWaves.map((wave, index) => {
           return (
-            <div key={index} style={{ backgroundColor: "OldLace", marginTop: "16px", padding: "8px" }}>
+            <div key={index} style={{ backgroundColor: "OldLace", marginTop:                     "16px", padding: "8px" }}>
+              
               <div>Address: {wave.address}</div>
               <div>Time: {wave.timestamp.toString()}</div>
               <div>Message: {wave.message}</div>
               </div>)
         })}
         </div>
-      </div>  
+      </div>
+      </div>
     );
 }
 
